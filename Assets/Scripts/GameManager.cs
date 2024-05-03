@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     public void AddScore(int score)
     {
         _score += score;
-        FruitText.text = $"Score: {_score}";
+        FruitText.text = $"Score: {_score}/6";
     }
 
     public void TakeDamage(int amount)

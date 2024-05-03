@@ -21,6 +21,10 @@ public class EnemyBehaviour : MonoBehaviour
 
     private Vector3 _currentDestination;
 
+    private bool isInvincible = false;
+
+    public GameObject ExplosionPrefab;
+
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -57,12 +61,30 @@ public class EnemyBehaviour : MonoBehaviour
         Animator.SetFloat("Speed", _speed);
     }
 
+    public IEnumerator MakeInvincible(float duration)
+    {
+        isInvincible = true;
+        yield return new WaitForSeconds(duration);
+        isInvincible = false;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.CompareTag("Player"))
+        if (collision.collider.CompareTag("Player") && !isInvincible)
         {
-            collision.collider.GetComponent<Rigidbody2D>().AddForce((collision.GetContact(0).normal * -Knockback) + Vector2.up);
-            GameManager.Instance.TakeDamage(Damage);
+            StartCoroutine(MakeInvincible(2f));
+            if (collision.GetContact(0).normal.x >= 0)
+            {
+                Destroy(gameObject);
+                // Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+                collision.collider.GetComponent<Rigidbody2D>().AddForce(Vector2.up * KnockbackUp, ForceMode2D.Impulse);
+            }
+            else
+            {
+                collision.collider.GetComponent<Rigidbody2D>().AddForce(collision.GetContact(0).normal * -Knockback);
+                GameManager.Instance.TakeDamage(Damage);
+            }
+
         }
     }
 }
